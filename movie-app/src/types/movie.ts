@@ -22,7 +22,7 @@ export interface Video {
 }
 
 export interface VideoResponse {
-    result: Video[];
+    results: Video[];
 }
 
 export interface Review {
