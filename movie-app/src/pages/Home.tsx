@@ -74,7 +74,7 @@ export default function Home() {
           backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/hero.jpg)`,
           backgroundSize: "cover",
           backgroundPosition: "center 30%",
-          padding: "120px 40px",
+          padding: "180px 40px 80px",
           textAlign: "center",
         }}
       >
