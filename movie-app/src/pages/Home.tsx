@@ -13,15 +13,22 @@ function MovieRow({
   title,
   movies,
   loading,
+  textColor,
 }: {
   title: string;
   movies: Movie[] | undefined;
   loading: boolean;
+  textColor: string;
 }) {
   return (
     <div style={{ marginBottom: "32px" }}>
       <h2
-        style={{ margin: "0 0 12px 0", fontSize: "18px", paddingLeft: "16px" }}
+        style={{
+          margin: "0 0 12px 0",
+          fontSize: "18px",
+          paddingLeft: "16px",
+          color: textColor,
+        }}
       >
         {title}
       </h2>
@@ -231,7 +238,7 @@ export default function Home() {
 
       {/* Genres */}
       <div style={{ padding: "16px 16px 8px" }}>
-        <h2 style={{ margin: "0 0 12px", fontSize: "18px" }}>
+        <h2 style={{ margin: "0 0 12px", fontSize: "18px", color: text }}>
           🎭 Browse by Genre
         </h2>
         <div
@@ -270,11 +277,13 @@ export default function Home() {
         title="🔥 Trending This Week"
         movies={trending?.results.slice(0, 12)}
         loading={trendingLoading}
+        textColor={text}
       />
       <MovieRow
         title="⭐ Popular Movies"
         movies={popular?.results.slice(0, 12)}
         loading={popularLoading}
+        textColor={text}
       />
 
       <style>{`div::-webkit-scrollbar { display: none; }`}</style>

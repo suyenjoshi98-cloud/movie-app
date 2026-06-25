@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { Movie } from "../types/movie";
 import { useFavorites } from "../hooks/useFavorites";
+import { useTheme } from "../context/ThemeContext";
 
 interface MovieCardProps {
   movie: Movie;
@@ -9,6 +10,10 @@ interface MovieCardProps {
 export default function MovieCard({ movie }: MovieCardProps) {
   const navigate = useNavigate();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const { isDark } = useTheme();
+  const text = isDark ? "white" : "#1a1a2e";
+
+  if (!movie) return null;
 
   return (
     <div
@@ -24,7 +29,6 @@ export default function MovieCard({ movie }: MovieCardProps) {
       onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
       onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
     >
-      {/* Poster */}
       <div
         style={{ position: "relative" }}
         onClick={() => navigate(`/movie/${movie.id}`)}
@@ -44,7 +48,6 @@ export default function MovieCard({ movie }: MovieCardProps) {
             borderRadius: "8px",
           }}
         />
-        {/* Rating Badge */}
         <div
           style={{
             position: "absolute",
@@ -58,9 +61,8 @@ export default function MovieCard({ movie }: MovieCardProps) {
             fontWeight: "bold",
           }}
         >
-          ⭐ {movie.vote_average.toFixed(1)}
+          ⭐ {movie.vote_average?.toFixed(1) ?? "N/A"}
         </div>
-        {/* Favorite Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -87,12 +89,11 @@ export default function MovieCard({ movie }: MovieCardProps) {
           {isFavorite(movie.id) ? "❤️" : "🤍"}
         </button>
       </div>
-      {/* Title */}
       <p
         style={{
           margin: "6px 2px 0",
           fontSize: "12px",
-          color: "white",
+          color: text,
           fontWeight: "bold",
           overflow: "hidden",
           textOverflow: "ellipsis",
