@@ -11,48 +11,99 @@ export default function MovieCard({ movie }: MovieCardProps) {
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
   return (
-    <div style={{
-      border: "1px solid #333",
-      borderRadius: "8px",
-      width: "200px",
-      backgroundColor: "#16213e",
-      cursor: "pointer",
-      overflow: "hidden",
-    }}>
-      <img
-        src={movie.poster_path
-          ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
-          : "https://via.placeholder.com/200x300?text=No+Image"}
-        alt={movie.title}
+    <div
+      style={{
+        width: "140px",
+        flexShrink: 0,
+        cursor: "pointer",
+        position: "relative",
+        borderRadius: "8px",
+        overflow: "hidden",
+        transition: "transform 0.2s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+    >
+      {/* Poster */}
+      <div
+        style={{ position: "relative" }}
         onClick={() => navigate(`/movie/${movie.id}`)}
-        style={{ width: "100%", display: "block" }}
-      />
-      <div style={{ padding: "10px" }}>
-        <h3 style={{ fontSize: "14px", color: "white", margin: "0 0 5px" }}>
-          {movie.title}
-        </h3>
-        <p style={{ fontSize: "12px", color: "gold", margin: "0 0 5px" }}>
-          ⭐ {movie.vote_average.toFixed(1)}
-        </p>
-        <p style={{ fontSize: "11px", color: "gray", margin: "0 0 8px" }}>
-          {movie.release_date?.slice(0, 4)}
-        </p>
-        <button
-          onClick={() => isFavorite(movie.id) ? removeFavorite(movie.id) : addFavorite(movie)}
+      >
+        <img
+          src={
+            movie.poster_path
+              ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
+              : "https://via.placeholder.com/140x210?text=No+Image"
+          }
+          alt={movie.title}
           style={{
-            width: "100%",
-            padding: "5px",
-            backgroundColor: isFavorite(movie.id) ? "#e74c3c" : "#333",
-            color: "white",
-            border: "none",
+            width: "140px",
+            height: "210px",
+            objectFit: "cover",
+            display: "block",
+            borderRadius: "8px",
+          }}
+        />
+        {/* Rating Badge */}
+        <div
+          style={{
+            position: "absolute",
+            top: "6px",
+            left: "6px",
+            backgroundColor: "rgba(0,0,0,0.75)",
+            color: "gold",
+            fontSize: "11px",
+            padding: "2px 6px",
             borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "12px",
+            fontWeight: "bold",
           }}
         >
-          {isFavorite(movie.id) ? "❤️ Remove" : "🤍 Favorite"}
+          ⭐ {movie.vote_average.toFixed(1)}
+        </div>
+        {/* Favorite Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            isFavorite(movie.id)
+              ? removeFavorite(movie.id)
+              : addFavorite(movie);
+          }}
+          style={{
+            position: "absolute",
+            top: "6px",
+            right: "6px",
+            backgroundColor: "rgba(0,0,0,0.75)",
+            border: "none",
+            borderRadius: "50%",
+            width: "28px",
+            height: "28px",
+            cursor: "pointer",
+            fontSize: "14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {isFavorite(movie.id) ? "❤️" : "🤍"}
         </button>
       </div>
+      {/* Title */}
+      <p
+        style={{
+          margin: "6px 2px 0",
+          fontSize: "12px",
+          color: "white",
+          fontWeight: "bold",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {movie.title}
+      </p>
+      <p style={{ margin: "2px 2px 0", fontSize: "11px", color: "gray" }}>
+        {movie.release_date?.slice(0, 4)}
+      </p>
     </div>
   );
 }

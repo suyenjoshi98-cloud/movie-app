@@ -9,6 +9,42 @@ import type { Movie } from "../types/movie";
 import { useTheme } from "../context/ThemeContext";
 import SkeletonCard from "../components/SkeletonCard";
 
+function MovieRow({
+  title,
+  movies,
+  loading,
+}: {
+  title: string;
+  movies: Movie[] | undefined;
+  loading: boolean;
+}) {
+  return (
+    <div style={{ marginBottom: "32px" }}>
+      <h2
+        style={{ margin: "0 0 12px 0", fontSize: "18px", paddingLeft: "16px" }}
+      >
+        {title}
+      </h2>
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          overflowX: "auto",
+          paddingLeft: "16px",
+          paddingRight: "16px",
+          paddingBottom: "8px",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+      >
+        {loading
+          ? [...Array(8)].map((_, i) => <SkeletonCard key={i} />)
+          : movies?.map((movie) => <MovieCard key={movie.id} movie={movie} />)}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [search, setSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -19,6 +55,9 @@ export default function Home() {
   const { data: suggestions } = useMovies(search);
   const { isDark } = useTheme();
 
+  const bg = isDark ? "#0f0f1a" : "#f0f0f0";
+  const text = isDark ? "white" : "#1a1a2e";
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
@@ -28,13 +67,7 @@ export default function Home() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: isDark ? "#0f0f1a" : "#f0f0f0",
-        minHeight: "100vh",
-        color: isDark ? "white" : "#1a1a2e",
-      }}
-    >
+    <div style={{ backgroundColor: bg, minHeight: "100vh", color: text }}>
       {/* Hero Banner */}
       <div
         style={{
@@ -45,14 +78,12 @@ export default function Home() {
           textAlign: "center",
         }}
       >
-        <h1 style={{ fontSize: "40px", margin: "40px 0 10px", color: "white" }}>
+        <h1 style={{ fontSize: "40px", margin: "0 0 10px", color: "white" }}>
           Welcome to CineSearch 🎬
         </h1>
         <p style={{ fontSize: "18px", color: "#ccc", marginBottom: "30px" }}>
           Millions of movies to discover. Explore now.
         </p>
-
-        {/* Search Bar */}
         <form
           onSubmit={handleSearch}
           style={{
@@ -82,9 +113,9 @@ export default function Home() {
                 backgroundColor: "white",
                 color: "#1a1a2e",
                 outline: "none",
+                boxSizing: "border-box",
               }}
             />
-            {/* Suggestions Dropdown */}
             {showSuggestions &&
               search &&
               suggestions?.results &&
@@ -102,6 +133,7 @@ export default function Home() {
                     overflowY: "auto",
                     border: "1px solid #333",
                     textAlign: "left",
+                    marginTop: "4px",
                   }}
                 >
                   {suggestions.results.slice(0, 6).map((movie: Movie) => (
@@ -154,7 +186,6 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                  {/* Show More */}
                   <div
                     onClick={() => {
                       setShowSuggestions(false);
@@ -167,7 +198,6 @@ export default function Home() {
                       color: "#e74c3c",
                       fontWeight: "bold",
                       fontSize: "14px",
-                      borderTop: "1px solid #333",
                     }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.backgroundColor = "#2a2a3e")
@@ -199,18 +229,18 @@ export default function Home() {
         </form>
       </div>
 
-      {/* Content */}
-      <div style={{ padding: "20px" }}>
-        {/* Genres */}
-        <h2 style={{ color: isDark ? "white" : "#1a1a2e" }}>
+      {/* Genres */}
+      <div style={{ padding: "16px 16px 8px" }}>
+        <h2 style={{ margin: "0 0 12px", fontSize: "18px" }}>
           🎭 Browse by Genre
         </h2>
         <div
           style={{
             display: "flex",
-            flexWrap: "wrap",
-            gap: "10px",
-            marginBottom: "30px",
+            gap: "8px",
+            overflowX: "auto",
+            paddingBottom: "8px",
+            scrollbarWidth: "none",
           }}
         >
           {genres?.genres.map((genre) => (
@@ -218,69 +248,36 @@ export default function Home() {
               key={genre.id}
               onClick={() => navigate(`/genre/${genre.id}?name=${genre.name}`)}
               style={{
-                padding: "8px 16px",
+                padding: "6px 14px",
                 backgroundColor: isDark ? "#1a1a2e" : "#ffffff",
-                color: isDark ? "white" : "#1a1a2e",
-                border: "1px solid #333",
+                color: text,
+                border: "1px solid #444",
                 borderRadius: "20px",
                 cursor: "pointer",
+                whiteSpace: "nowrap",
+                fontSize: "13px",
+                flexShrink: 0,
               }}
             >
               {genre.name}
             </button>
           ))}
         </div>
-
-        {/* Trending */}
-        <h2 style={{ color: isDark ? "white" : "#1a1a2e" }}>
-          🔥 Trending This Week
-        </h2>
-        {trendingLoading ? (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "15px",
-              marginBottom: "30px",
-            }}
-          >
-            {[...Array(8)].map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "15px",
-              marginBottom: "30px",
-            }}
-          >
-            {trending?.results.slice(0, 8).map((movie: Movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        )}
-
-        {/* Popular */}
-        <h2 style={{ color: isDark ? "white" : "#1a1a2e" }}>
-          ⭐ Popular Movies
-        </h2>
-        {popularLoading ? (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}>
-            {[...Array(8)].map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}>
-            {popular?.results.slice(0, 8).map((movie: Movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* Movie Rows */}
+      <MovieRow
+        title="🔥 Trending This Week"
+        movies={trending?.results.slice(0, 12)}
+        loading={trendingLoading}
+      />
+      <MovieRow
+        title="⭐ Popular Movies"
+        movies={popular?.results.slice(0, 12)}
+        loading={popularLoading}
+      />
+
+      <style>{`div::-webkit-scrollbar { display: none; }`}</style>
     </div>
   );
 }
