@@ -75,11 +75,15 @@ export default function AIRecommender() {
 Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no markdown, no explanation, no backticks, just raw JSON like this:
 [{"title":"Movie Name","year":"2023","reason":"Why they'd love it based on their picks","genre":"Action/Drama","rating":"8.5/10"}]`;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     try {
       const response = await fetch(
         "https://openrouter.ai/api/v1/chat/completions",
         {
           method: "POST",
+          signal: controller.signal,
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
@@ -87,12 +91,13 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
             "X-Title": "CineSearch",
           },
           body: JSON.stringify({
-            model: "mistralai/mistral-7b-instruct:free",
+            model: "nvidia/nemotron-nano-9b-v2:free",
             messages: [{ role: "user", content: prompt }],
           }),
         },
       );
 
+      clearTimeout(timeout);
       const data = await response.json();
       console.log("OpenRouter response:", data);
 
@@ -101,16 +106,31 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
         return;
       }
 
-      const raw = data.choices[0].message.content.trim();
-      const clean = raw.replace(/```json|```/g, "").trim();
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        setError("No response from AI. Please try again.");
+        return;
+      }
+      const jsonWatch = content.match(/\[[\s\S]*\]/);
+      if (!jsonWatch) {
+        setError("Could not parse AI response. Please try again.");
+        return;
+      }
+
+      // const clean = content.replace(/```json|```/g, "").trim();
       const parsed: Recommendation[] = JSON.parse(clean);
       setRecommendations(parsed);
     } catch (err) {
       console.error("Error:", err);
-      setError(
-        `Error: ${err instanceof Error ? err.message : "Unknown error"}`,
-      );
+      if (err instanceof Error && err.name === "AbortError") {
+        setError("Request timed out. Please try again.");
+      } else {
+        setError(
+          `Error: ${err instanceof Error ? err.message : "Unknown error"}`,
+        );
+      }
     } finally {
+      clearTimeout(timeout);
       setIsLoading(false);
     }
   };
@@ -130,11 +150,9 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
     >
       <h1 style={{ textAlign: "center" }}>🤖 AI Movie Recommender</h1>
       <p style={{ textAlign: "center", color: "gray", marginBottom: "30px" }}>
-        Pick up to 5 movies you love and gemini will recommend what to watch
-        next
+        Pick up to 5 movies you love and AI will recommend what to watch next
       </p>
 
-      {/* Selected Movies */}
       {selectedMovies.length > 0 && (
         <div style={{ marginBottom: "20px", textAlign: "center" }}>
           <p style={{ color: "gray", marginBottom: "8px" }}>
@@ -171,12 +189,10 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
         </div>
       )}
 
-      {/* Custom Movie Input */}
       <div
         style={{
           display: "flex",
           gap: "10px",
-          marginBottom: "24px",
           maxWidth: "500px",
           margin: "0 auto 24px",
         }}
@@ -212,7 +228,6 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
         </button>
       </div>
 
-      {/* Popular Movies Grid */}
       <div style={{ maxWidth: "800px", margin: "0 auto 24px" }}>
         <p style={{ color: "gray", marginBottom: "12px", textAlign: "center" }}>
           Or pick from popular movies:
@@ -250,12 +265,11 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
         </div>
       </div>
 
-      {/* Mood Input */}
       <div style={{ maxWidth: "500px", margin: "0 auto 24px" }}>
         <input
           value={mood}
           onChange={(e) => setMood(e.target.value)}
-          placeholder="Optional: describe your mood (e.g. something thrilling, feel-good, sad...)"
+          placeholder="Optional: describe your mood (e.g. thrilling, feel-good, sad...)"
           style={{
             width: "100%",
             padding: "10px 16px",
@@ -269,7 +283,6 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
         />
       </div>
 
-      {/* Get Recommendations Button */}
       <div style={{ textAlign: "center", marginBottom: "32px" }}>
         <button
           onClick={getRecommendations}
@@ -285,20 +298,18 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
             fontWeight: "bold",
           }}
         >
-          {isLoading ? "🤖 Gemini is thinking..." : "✨ Get AI Recommendations"}
+          {isLoading ? "🤖 AI is thinking..." : "✨ Get AI Recommendations"}
         </button>
       </div>
 
-      {/* Error */}
       {error && (
         <p style={{ color: "#e74c3c", textAlign: "center" }}>{error}</p>
       )}
 
-      {/* Recommendations */}
       {recommendations.length > 0 && (
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-            🎬 Gemini's Picks for You
+            🎬 AI Picks for You
           </h2>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "16px" }}
@@ -343,7 +354,9 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
                       marginBottom: "6px",
                     }}
                   >
-                    <h3 style={{ margin: 0, fontSize: "18px" }}>{rec.title}</h3>
+                    <h3 style={{ margin: 0, fontSize: "18px", color: text }}>
+                      {rec.title}
+                    </h3>
                     <span style={{ color: "gray", fontSize: "13px" }}>
                       {rec.year}
                     </span>

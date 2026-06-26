@@ -5,7 +5,6 @@ import { useMovieReviews } from "../hooks/useMovieReviews";
 import { useMovieCredits } from "../hooks/useMovieCredits";
 import { useSimilarMovies } from "../hooks/useSimilarMovies";
 import { useWatchHistory } from "../hooks/useWatchHistory";
-
 import MovieRating from "../components/MovieRating";
 import MovieCard from "../components/MovieCard";
 import type { Movie } from "../types/movie";
@@ -37,15 +36,15 @@ export default function MovieDetail() {
   );
 
   const handleShare = () => {
-    const tmdbUrl = `https://www.themoviedb.org/movie/${id}`;
+    const url = window.location.href;
     if (navigator.share) {
       navigator.share({
         title: movie?.title,
         text: movie?.overview,
-        url: tmdbUrl,
+        url: url,
       });
     } else {
-      navigator.clipboard.writeText(tmdbUrl).then(() => {
+      navigator.clipboard.writeText(url).then(() => {
         alert("Link copied to Clipboard!");
       });
     }
@@ -143,6 +142,7 @@ export default function MovieDetail() {
               🔗 Share
             </button>
           </div>
+
           <button
             onClick={() => movie && addToHistory(movie)}
             style={{
@@ -153,13 +153,14 @@ export default function MovieDetail() {
               borderRadius: "8px",
               cursor: "pointer",
               fontSize: "14px",
+              marginTop: "10px",
             }}
           >
             {isWatched(Number(id)) ? "✅ Watched" : "👁️ Mark as Watched"}
           </button>
 
           {/* Rating */}
-          <div style={{ padding: "0 20px 20px" }}>
+          <div style={{ padding: "0 0 20px" }}>
             <MovieRating movieId={Number(id)} movieTitle={movie?.title || ""} />
           </div>
 
@@ -295,7 +296,6 @@ export default function MovieDetail() {
           </p>
         ) : (
           <div>
-            {/* Stream */}
             {providers.flatrate && providers.flatrate.length > 0 && (
               <div style={{ marginBottom: "15px" }}>
                 <p style={{ color: "gray", marginBottom: "8px" }}>Stream:</p>
@@ -323,7 +323,6 @@ export default function MovieDetail() {
               </div>
             )}
 
-            {/* Rent */}
             {providers.rent && providers.rent.length > 0 && (
               <div style={{ marginBottom: "15px" }}>
                 <p style={{ color: "gray", marginBottom: "8px" }}>Rent:</p>
@@ -351,7 +350,6 @@ export default function MovieDetail() {
               </div>
             )}
 
-            {/* Buy */}
             {providers.buy && providers.buy.length > 0 && (
               <div>
                 <p style={{ color: "gray", marginBottom: "8px" }}>Buy:</p>
