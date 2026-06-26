@@ -117,7 +117,7 @@ Recommend exactly 6 movies they would enjoy. Respond ONLY with a JSON array, no 
         return;
       }
 
-      // const clean = content.replace(/```json|```/g, "").trim();
+      const clean = content.replace(/```json|```/g, "").trim();
       const parsed: Recommendation[] = JSON.parse(clean);
       setRecommendations(parsed);
     } catch (err) {
